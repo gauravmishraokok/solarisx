@@ -26,6 +26,7 @@ class MemCubeFactory:
         return cube
 
 class IngestionPipeline:
+    """Orchestrates the conversion of ConversationTurnEvents into segmented, classified, and deduplicated MemCubes."""
     def __init__(
         self,
         segmenter: EpisodeSegmenter,
