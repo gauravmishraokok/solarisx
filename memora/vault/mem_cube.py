@@ -13,7 +13,7 @@ from memora.core.types import MemCube, MemoryType, MemoryTier, Provenance
 from memora.core.interfaces import IEmbeddingModel
 from typing import Optional
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class MemCubeFactory:
@@ -78,8 +78,8 @@ class MemCubeFactory:
             "access_count": cube.access_count,
             "ttl_seconds": cube.ttl_seconds,
             "extra": cube.extra,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc).replace(tzinfo=None),
+            "updated_at": datetime.now(timezone.utc).replace(tzinfo=None)
         }
 
     def from_db_row(self, row: dict) -> MemCube:

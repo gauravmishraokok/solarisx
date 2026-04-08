@@ -6,18 +6,20 @@ Stores and retrieves semantic MemCubes with key-based upsert.
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
-from datetime import datetime
+from datetime import datetime, timezone
 from memora.core.interfaces import ISemanticRepo
 from memora.core.types import MemCube, MemoryType
 from memora.core.errors import MemoryNotFoundError, DuplicateMemoryError
 from memora.storage.postgres.models import MemCubeORM
+from memora.vault.timeline_writer import TimelineWriter
 
 
 class SemanticRepo(ISemanticRepo):
     """PostgreSQL implementation of semantic memory repository."""
     
-    def __init__(self, session_factory):
+    def __init__(self, session_factory, timeline_writer: TimelineWriter | None = None):
         self.session_factory = session_factory
+        self.timeline = timeline_writer
     
     async def save(self, cube: MemCube) -> str:
         """Persist a semantic MemCube. Returns the cube.id."""
@@ -52,7 +54,14 @@ class SemanticRepo(ISemanticRepo):
                 session.add(orm_cube)
                 await session.commit()
                 await session.refresh(orm_cube)
-                
+
+                if self.timeline:
+                    await self.timeline.write(
+                        event_type="created",
+                        cube_id=cube.id,
+                        session_id=cube.provenance.session_id if cube.provenance else None,
+                        description=f"Semantic memory saved: {cube.content[:80]}",
+                    )
                 return cube.id
                 
             except Exception as e:
@@ -77,6 +86,12 @@ class SemanticRepo(ISemanticRepo):
             
             await session.delete(orm_cube)
             await session.commit()
+            if self.timeline:
+                await self.timeline.write(
+                    event_type="evicted",
+                    cube_id=cube_id,
+                    description="Semantic memory hard-deleted",
+                )
     
     async def upsert_by_key(self, key: str, cube: MemCube) -> str:
         """Upsert: if a semantic memory with this key exists, update it. Otherwise insert."""
@@ -98,7 +113,7 @@ class SemanticRepo(ISemanticRepo):
                     existing_orm.tier = cube.tier.value
                     existing_orm.tags = cube.tags
                     existing_orm.extra = cube.extra
-                    existing_orm.updated_at = datetime.utcnow()
+                    existing_orm.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
                     
                     if cube.provenance:
                         existing_orm.provenance = {
@@ -111,6 +126,12 @@ class SemanticRepo(ISemanticRepo):
                         }
                     
                     await session.commit()
+                    if self.timeline:
+                        await self.timeline.write(
+                            event_type="updated",
+                            cube_id=str(existing_orm.id),
+                            description=f"Semantic memory upserted (key={key}): {cube.content[:80]}",
+                        )
                     return str(existing_orm.id)
                 else:
                     # Insert new record with key in tags
@@ -138,7 +159,13 @@ class SemanticRepo(ISemanticRepo):
                     session.add(orm_cube)
                     await session.commit()
                     await session.refresh(orm_cube)
-                    
+
+                    if self.timeline:
+                        await self.timeline.write(
+                            event_type="created",
+                            cube_id=cube.id,
+                            description=f"Semantic memory inserted (key={key}): {cube.content[:80]}",
+                        )
                     return cube.id
                     
             except Exception as e:
@@ -152,7 +179,7 @@ class SemanticRepo(ISemanticRepo):
         if orm_cube.provenance:
             prov_data = orm_cube.provenance
             from memora.core.types import Provenance
-            from datetime import datetime
+            from datetime import datetime, timezone
             provenance = Provenance(
                 origin=prov_data["origin"],
                 session_id=prov_data["session_id"],

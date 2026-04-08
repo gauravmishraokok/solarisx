@@ -4,7 +4,7 @@ Decides which tier (hot/warm/cold) a memory should be placed in based on
 access patterns, recency, and business rules.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any
 from memora.core.types import MemCube, MemoryTier
 from memora.core.config import get_settings
@@ -28,7 +28,7 @@ class TierRouter:
             MemoryTier: The tier to place the memory in
         """
         if current_time is None:
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc).replace(tzinfo=None)
         
         # IF access_count >= 10 AND last access within 24h -> HOT
         if self._should_be_hot(cube, current_time):
@@ -71,7 +71,7 @@ class TierRouter:
         Used when memory is accessed and needs to be moved up.
         """
         if current_time is None:
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc).replace(tzinfo=None)
         
         current_tier = cube.tier
         
@@ -96,7 +96,7 @@ class TierRouter:
         Used during periodic cleanup or when storage is needed.
         """
         if current_time is None:
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc).replace(tzinfo=None)
         
         current_tier = cube.tier
         

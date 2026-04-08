@@ -3,10 +3,10 @@
 Handles TTL-based cleanup, tier migration, and memory expiration.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Optional
-from ...core.types import MemCube, MemoryTier
-from ...core.config import get_settings
+from memora.core.types import MemCube, MemoryTier
+from memora.core.config import get_settings
 
 
 class TTLManager:
@@ -27,7 +27,7 @@ class TTLManager:
             bool: True if the memory has expired
         """
         if current_time is None:
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc).replace(tzinfo=None)
         
         # No TTL means never expires
         if not cube.ttl_seconds:
@@ -84,7 +84,7 @@ class TTLManager:
         Get all expired memories from a list.
         """
         if current_time is None:
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc).replace(tzinfo=None)
         
         expired = []
         for cube in cubes:
@@ -99,7 +99,7 @@ class TTLManager:
         Get memories that will expire within the specified hours.
         Returns list of dicts with memory and expiration time.
         """
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc).replace(tzinfo=None)
         future_time = current_time + timedelta(hours=hours_ahead)
         
         expiring_soon = []
@@ -215,7 +215,7 @@ class TTLManager:
         """
         return {
             "cleanup_interval_hours": cleanup_interval_hours,
-            "next_cleanup": datetime.utcnow() + timedelta(hours=cleanup_interval_hours),
+            "next_cleanup": datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=cleanup_interval_hours),
             "recommended_cleanup_times": [
                 "02:00 UTC",  # 2 AM UTC (low traffic)
                 "14:00 UTC"   # 2 PM UTC (backup cleanup)

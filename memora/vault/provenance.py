@@ -4,10 +4,10 @@ Manages memory provenance, version history, and parent-child relationships.
 """
 
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
-from ...core.types import Provenance, MemCube
-from ...core.errors import ValidationError
+from memora.core.types import Provenance, MemCube
+from memora.core.errors import ValidationError
 
 
 class ProvenanceTracker:
@@ -31,7 +31,7 @@ class ProvenanceTracker:
             origin=new_origin,
             session_id=new_session_id,
             created_at=old_provenance.created_at,  # Keep original creation time
-            updated_at=datetime.utcnow(),
+            updated_at=datetime.now(timezone.utc).replace(tzinfo=None),
             version=new_version,
             parent_id=old_provenance.parent_id
         )
@@ -97,7 +97,7 @@ class ProvenanceTracker:
             origin=origin,
             session_id=session_id,
             created_at=oldest_created,
-            updated_at=datetime.utcnow(),
+            updated_at=datetime.now(timezone.utc).replace(tzinfo=None),
             version=highest_version + 1,  # Increment for merge
             parent_id=primary.parent_id or secondary.parent_id
         )
@@ -168,7 +168,7 @@ class ProvenanceTracker:
             "nodes": [],
             "edges": [],
             "metadata": {
-                "exported_at": datetime.utcnow(),
+                "exported_at": datetime.now(timezone.utc).replace(tzinfo=None),
                 "session_id": session_id
             }
         }

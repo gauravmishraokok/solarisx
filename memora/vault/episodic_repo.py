@@ -13,13 +13,15 @@ from memora.core.errors import MemoryNotFoundError, DuplicateMemoryError
 from memora.storage.postgres.models import MemCubeORM, EpisodeORM
 from memora.storage.postgres.connection import get_async_session
 from memora.storage.postgres.models import Base
+from memora.vault.timeline_writer import TimelineWriter
 
 
 class EpisodicRepo(IEpisodicRepo):
     """PostgreSQL implementation of episodic memory repository."""
     
-    def __init__(self, session_factory):
+    def __init__(self, session_factory, timeline_writer: TimelineWriter | None = None):
         self.session_factory = session_factory
+        self.timeline = timeline_writer
     
     async def save(self, cube: MemCube) -> str:
         """Persist an episodic MemCube. Returns the cube.id."""
@@ -54,7 +56,14 @@ class EpisodicRepo(IEpisodicRepo):
                 session.add(orm_cube)
                 await session.commit()
                 await session.refresh(orm_cube)
-                
+
+                if self.timeline:
+                    await self.timeline.write(
+                        event_type="created",
+                        cube_id=cube.id,
+                        session_id=cube.provenance.session_id if cube.provenance else None,
+                        description=f"Episodic memory saved: {cube.content[:80]}",
+                    )
                 return cube.id
                 
             except Exception as e:
@@ -79,6 +88,12 @@ class EpisodicRepo(IEpisodicRepo):
             
             await session.delete(orm_cube)
             await session.commit()
+            if self.timeline:
+                await self.timeline.write(
+                    event_type="evicted",
+                    cube_id=cube_id,
+                    description="Episodic memory hard-deleted",
+                )
     
     async def list_recent(self, session_id: str, limit: int = 20) -> List[MemCube]:
         """Return most recent N episodic memories for a session, newest first."""
@@ -106,10 +121,19 @@ class EpisodicRepo(IEpisodicRepo):
             
             # Update provenance timestamp if exists
             if orm_cube.provenance:
-                from datetime import datetime
-                orm_cube.provenance["updated_at"] = datetime.utcnow()
-            
+                from datetime import datetime, timezone
+                orm_cube.provenance["updated_at"] = datetime.now(timezone.utc).replace(tzinfo=None)
+
             await session.commit()
+            if self.timeline:
+                await self.timeline.write(
+                    event_type="updated",
+                    cube_id=cube_id,
+                    description="access_count incremented",
+                )
+            return
+            
+            # commit already done above if provenance existed
     
     def _orm_to_memcube(self, orm_cube: MemCubeORM) -> MemCube:
         """Convert ORM model to MemCube domain object."""
@@ -118,7 +142,7 @@ class EpisodicRepo(IEpisodicRepo):
         if orm_cube.provenance:
             prov_data = orm_cube.provenance
             from memora.core.types import Provenance
-            from datetime import datetime
+            from datetime import datetime, timezone
             provenance = Provenance(
                 origin=prov_data["origin"],
                 session_id=prov_data["session_id"],

@@ -3,15 +3,15 @@
 Manages quarantine records for contradictory memories.
 """
 
-from typing import Optional, List
+from typing import Optional, List, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from uuid import uuid4
-from datetime import datetime
-from ...core.interfaces import IQuarantineRepo
-from ...core.types import MemCube, ContradictionVerdict, QuarantineStatus
-from ...core.errors import MemoryNotFoundError
-from ..storage.postgres.models import MemCubeORM, ContradictionORM, QuarantineLogORM
+from datetime import datetime, timezone
+from memora.core.interfaces import IQuarantineRepo
+from memora.core.types import MemCube, ContradictionVerdict, QuarantineStatus
+from memora.core.errors import MemoryNotFoundError
+from memora.storage.postgres.models import MemCubeORM, ContradictionORM, QuarantineLogORM
 
 
 class QuarantineRepo(IQuarantineRepo):
@@ -37,7 +37,7 @@ class QuarantineRepo(IQuarantineRepo):
                 session.add(contradiction)
                 
                 # Create quarantine log
-                quarantine_id = f"quarantine-{cube.id[:8]}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+                quarantine_id = f"quarantine-{cube.id[:8]}-{datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}"
                 quarantine_log = QuarantineLogORM(
                     id=str(uuid4()),
                     quarantine_id=quarantine_id,
@@ -132,7 +132,7 @@ class QuarantineRepo(IQuarantineRepo):
                 ).values(
                     status=status.value,
                     merged_content=merged_content if status == QuarantineStatus.RESOLVED_MERGE else None,
-                    resolved_at=datetime.utcnow()
+                    resolved_at=datetime.now(timezone.utc).replace(tzinfo=None)
                 )
                 
                 result = await session.execute(query)
@@ -151,7 +151,7 @@ class QuarantineRepo(IQuarantineRepo):
         provenance = None
         if orm_cube.provenance:
             prov_data = orm_cube.provenance
-            from ...core.types import Provenance
+            from memora.core.types import Provenance
             provenance = Provenance(
                 origin=prov_data["origin"],
                 session_id=prov_data["session_id"],
