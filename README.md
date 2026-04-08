@@ -825,25 +825,25 @@ memora/
 <table>
 <tr>
 <td align="center" width="25%">
-<b>Person A</b><br/>
+<b>Gaurav Mishra</b><br/>
 <i>Foundation</i><br/><br/>
 <code>core/</code> <code>storage/</code> <code>vault/</code><br/><br/>
 Domain types · pgvector storage · MemCube factory · Three-tier routing · Provenance system · Migration scripts
 </td>
 <td align="center" width="25%">
-<b>Person B</b><br/>
+<b>Arnav Singh</b><br/>
 <i>Intelligence Pipeline</i><br/><br/>
 <code>scheduler/</code> <code>llm/</code> <code>retrieval/</code><br/><br/>
 Nemori episode segmentation · Predict-calibrate dedup · Hybrid retrieval · Groq integration · Reranker
 </td>
 <td align="center" width="25%">
-<b>Person C</b><br/>
+<b>Avinash Singh Pal</b><br/>
 <i>Decision Loop</i><br/><br/>
 <code>court/</code> <code>experience/</code> <code>agent/</code><br/><br/>
 Memory Court ⚖️ · Contradiction detection · Experience Learner 🧠 · MemoraAgent turn loop · Session management
 </td>
 <td align="center" width="25%">
-<b>Person D</b><br/>
+<b>Lavish</b><br/>
 <i>Interface Layer</i><br/><br/>
 <code>api/</code> <code>frontend/</code><br/><br/>
 FastAPI wiring · D3 knowledge graph · Court resolution UI · Memory timeline · Health dashboard · Demo seeding
