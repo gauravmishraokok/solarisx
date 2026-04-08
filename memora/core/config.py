@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     openai_api_key: str = ""
     llm_provider: str = "groq"     # "groq" | "openai"
-    llm_model: str = "llama3-70b-8192"  # Model string
+    llm_model: str = "llama3-8b-8192"  # Model string
 
     # Databases
     database_url: str = "postgresql+asyncpg://memora:memora@localhost:5432/memora"
