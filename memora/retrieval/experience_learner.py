@@ -8,6 +8,7 @@ class ExperienceLearner:
         self._cache_ttl: datetime | None = None
 
     async def get_penalized_ids(self) -> set[str]:
+        """Fetches and caches specific MemoryCube IDs that must be penalized for 60 seconds."""
         now = datetime.utcnow()
         if self._cache_ttl and (now - self._cache_ttl).total_seconds() < 60:
             return {cid for cid, count in self._cache.items() if count >= 2}
