@@ -254,10 +254,10 @@ Single source of truth for all configuration. Reads from environment variables a
 ```python
 class Settings(BaseSettings):
     # LLM providers
-    anthropic_api_key: str = ""
+    groq_api_key: str = ""
     openai_api_key: str = ""
-    llm_provider: str = "anthropic"     # "anthropic" | "openai"
-    llm_model: str = "claude-opus-4-5"  # Model string
+    llm_provider: str = "groq"     # "groq" | "openai"
+    llm_model: str = "llama3-70b-8192"  # Model string
 
     # Databases
     database_url: str = "postgresql+asyncpg://memora:memora@localhost:5432/memora"

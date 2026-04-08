@@ -223,7 +223,7 @@ class TestCoreConfig:
         """Test get_settings function."""
         settings = get_settings()
         assert settings is not None
-        assert settings.llm_provider in ["anthropic", "openai"]
+        assert settings.llm_provider in ["groq", "openai"]
         assert settings.embedding_model == "all-MiniLM-L6-v2"
         assert settings.embedding_dim == 384
     
