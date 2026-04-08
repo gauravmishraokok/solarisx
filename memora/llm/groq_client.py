@@ -11,6 +11,7 @@ class GroqClient(ILLM):
         self.model = model
 
     async def complete(self, system: str, user: str, max_tokens: int = 1000) -> str:
+        # Standard backoff retry profile: wait 1s, then 2s, then 4s on RateLimit exception
         for attempt, delay in enumerate([1, 2, 4]):
             try:
                 response = await self.client.chat.completions.create(
