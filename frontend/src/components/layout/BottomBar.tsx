@@ -11,10 +11,13 @@ const TABS: { id: 'graph' | 'timeline' | 'health'; label: string }[] = [
 ]
 
 export function BottomBar() {
-  const { bottomTab, isBottomOpen, setBottomTab, toggleBottom } = useUIStore()
+  const { bottomTab, isBottomOpen, bottomPanelHeight, setBottomTab, toggleBottom } = useUIStore()
 
   return (
-    <div className={`bottom-bar ${isBottomOpen ? 'open' : 'closed'}`}>
+    <div
+      className={`bottom-bar ${isBottomOpen ? 'open' : 'closed'}`}
+      style={isBottomOpen ? { height: bottomPanelHeight } : { height: 40 }}
+    >
       {/* Tab bar */}
       <div style={{
         display: 'flex',

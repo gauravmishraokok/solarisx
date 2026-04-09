@@ -113,11 +113,80 @@ button, input, textarea { font: inherit; }
 }
 
 .shell {
-  display: grid;
-  grid-template-rows: 56px 1fr auto;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+}
+
+.shell-main-row {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  border-top: 1px solid var(--border-dim);
+}
+
+.shell-left {
+  flex-shrink: 0;
+  min-width: 220px;
+  max-width: 60vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+}
+
+.shell-resize-v {
+  flex: 0 0 6px;
+  width: 6px;
+  padding: 0;
+  border: none;
+  cursor: col-resize;
+  background: var(--border-dim);
+  align-self: stretch;
+}
+
+.shell-resize-v:hover,
+.shell-resize-v:focus-visible {
+  background: linear-gradient(180deg, var(--accent-blue), var(--accent-cyan));
+  opacity: 0.45;
+  outline: none;
+}
+
+.shell-center {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.shell-right {
+  flex: 0 0 360px;
+  width: 360px;
+  min-width: 280px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+}
+
+.shell-resize-h {
+  flex: 0 0 6px;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-top: 1px solid var(--border-dim);
+  cursor: row-resize;
+  background: var(--border-dim);
+}
+
+.shell-resize-h:hover,
+.shell-resize-h:focus-visible {
+  background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+  opacity: 0.45;
+  outline: none;
 }
 
 .main-grid {
@@ -160,14 +229,14 @@ button, input, textarea { font: inherit; }
 .bottom-bar {
   border-top: 1px solid var(--border-dim);
   background: var(--bg-surface);
-  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: height 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
 }
-.bottom-bar.open   { height: 220px; }
-.bottom-bar.closed { height: 40px;  }
+.bottom-bar.open   { min-height: 0; }
+.bottom-bar.closed { height: 40px !important; }
 
 .streaming::after {
   content: '▋';
