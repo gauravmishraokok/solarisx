@@ -23,7 +23,7 @@ class ContextBuilder:
             
         memory_block = self.format_memories(active_memories)
         
-        return f"{base_system_prompt}\n\n## RELEVANT MEMORIES\n{memory_block}"
+        return f"{base_system_prompt}\n\n<RELEVANT MEMORIES — internal context only, do NOT reproduce in your response>\n{memory_block}\n</RELEVANT MEMORIES>"
 
     def format_memories(self, memories: list[MemCube]) -> str:
         formatted_blocks = []
