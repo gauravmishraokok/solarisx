@@ -33,27 +33,31 @@ def create_app() -> FastAPI:
 # 1. Load settings
 settings = get_settings()
 
-# 2. Create DB engine + run migrations
-engine = await create_engine(settings.database_url)
+# 2. MongoDB Atlas connection
+await init_motor(settings.mongodb_url, settings.mongodb_db_name)
+db = await get_database()
+await setup_indexes(db)
 
 # 3. Initialize embedding model
 embedder = SentenceTransformerEmbedder(settings.embedding_model)
 
 # 4. Initialize storage clients
-pg_client = PgVectorClient(session_factory)
+mongo_vector_client = MongoVectorClient(db, settings.embedding_dim)
 graph_client = NetworkXClient() if settings.use_networkx_fallback else Neo4jClient(...)
 
 # 5. Initialize vault
 cube_factory = MemCubeFactory(embedder, settings)
-episodic_repo = EpisodicRepo(pg_client, timeline_writer)
+episodic_repo = EpisodicRepo(mongo_vector_client, timeline_writer)
+semantic_repo = SemanticRepo(mongo_vector_client, timeline_writer)
 kg_repo = KGRepo(graph_client, timeline_writer)
-quarantine_repo = QuarantineRepo(session_factory)
+quarantine_repo = QuarantineRepo(db)
 
 # 6. Initialize retrieval
-dense = DenseRetriever(pg_client, embedder)
-symbolic = SymbolicRetriever(session_factory)
+dense = DenseRetriever(mongo_vector_client, embedder)
+symbolic = SymbolicRetriever(db)
 expander = QueryExpander(kg_repo, symbolic)
-failure_log = FailureLogger(session_factory, bus)
+timeline_writer = TimelineWriter(db)
+failure_log = FailureLogger(db, bus)
 experience_learner = ExperienceLearner(failure_log)
 reranker = Reranker(experience_learner, settings)
 retriever = HybridRetriever(dense, symbolic, expander, reranker, settings)
@@ -64,7 +68,7 @@ llm = GroqClient(settings.groq_api_key, settings.llm_model)
 
 # 8. Initialize court
 detector = ContradictionDetector(settings.contradiction_threshold)
-judge = JudgeAgent(llm, pg_client, detector, embedder, settings, bus)
+judge = JudgeAgent(llm, retriever, detector, settings)
 quarantine_mgr = QuarantineManager(quarantine_repo)
 resolution_handler = ResolutionHandler(quarantine_repo, bus)
 
@@ -105,7 +109,7 @@ app.state.settings = settings
 **On shutdown:**
 ```python
 await context_pager.evict_all()
-await dispose_engine()
+await dispose_motor()
 bus.clear()
 ```
 

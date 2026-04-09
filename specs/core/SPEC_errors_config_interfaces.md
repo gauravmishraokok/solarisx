@@ -260,7 +260,8 @@ class Settings(BaseSettings):
     llm_model: str = "llama3-70b-8192"  # Model string
 
     # Databases
-    database_url: str = "postgresql+asyncpg://memora:memora@localhost:5432/memora"
+    mongodb_url: str = ""         # Full Atlas connection string
+    mongodb_db_name: str = "memora"
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_user: str = "neo4j"
     neo4j_password: str = "memorapass"

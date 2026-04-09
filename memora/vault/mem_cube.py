@@ -11,6 +11,7 @@ Does NOT: decide which tier (that's tier_router)
 """
 from memora.core.types import MemCube, MemoryType, MemoryTier, Provenance
 from memora.core.interfaces import IEmbeddingModel
+from memora.core.config import Settings
 from typing import Optional
 import uuid
 from datetime import datetime, timezone
@@ -18,9 +19,10 @@ from datetime import datetime, timezone
 
 class MemCubeFactory:
     """Factory for creating MemCube instances with proper validation and provenance."""
-    
-    def __init__(self, embedding_model: IEmbeddingModel):
+
+    def __init__(self, embedding_model: IEmbeddingModel, settings: Settings):
         self.embedder = embedding_model
+        self.settings = settings
 
     async def create(
         self,

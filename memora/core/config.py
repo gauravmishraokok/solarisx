@@ -10,7 +10,11 @@ from typing import Literal
 
 
 class Settings(BaseSettings):
-    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
     # LLM providers
     groq_api_key: str = ""
@@ -19,7 +23,8 @@ class Settings(BaseSettings):
     llm_model: str = "llama3-8b-8192"
 
     # Databases
-    database_url: str = "postgresql+asyncpg://memora:memora@localhost:5432/memora"
+    mongodb_url: str = ""
+    mongodb_db_name: str = "memora"
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_user: str = "neo4j"
     neo4j_password: str = "memorapass"
@@ -39,7 +44,7 @@ class Settings(BaseSettings):
 
     # Embedding
     embedding_model: str = "all-MiniLM-L6-v2"
-    embedding_dim: Literal[384] = 384
+    embedding_dim: int = 384
 
     # Episode segmentation
     episode_buffer_size: int = 5
@@ -55,8 +60,8 @@ class Settings(BaseSettings):
         """Ensure dense_weight + symbolic_weight equals 1.0."""
         values = info.data if info.data else {}
         if 'dense_weight' in values and 'symbolic_weight' in values:
-            dense = values['dense_weight']
-            symbolic = values['symbolic_weight']
+            dense = float(values['dense_weight'])
+            symbolic = float(values['symbolic_weight'])
             if abs((dense + symbolic) - 1.0) > 0.001:
                 raise ValueError('dense_weight + symbolic_weight must equal 1.0')
         return v
@@ -65,8 +70,20 @@ class Settings(BaseSettings):
     @classmethod
     def validate_contradiction_threshold(cls, v):
         """Validate contradiction_threshold is in valid range."""
-        if not (0.0 <= v <= 1.0):
-            raise ValueError('contradiction_threshold must be between 0.0 and 1.0')
+        try:
+            val = float(v)
+            if not (0.0 <= val <= 1.0):
+                raise ValueError('contradiction_threshold must be between 0.0 and 1.0')
+        except (TypeError, ValueError):
+            raise ValueError(f'Invalid contradiction_threshold: {v}')
+        return v
+
+    @field_validator('embedding_dim')
+    @classmethod
+    def validate_embedding_dim(cls, v):
+        """Ensure embedding_dim is 384."""
+        if v != 384:
+            raise ValueError('embedding_dim must be 384')
         return v
 
 

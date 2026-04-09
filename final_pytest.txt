@@ -1,0 +1,207 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\gaura\AppData\Local\pypoetry\Cache\virtualenvs\memora-uEl6nKVZ-py3.11\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\gaura\OneDrive\Desktop\hack-solarisx
+configfile: pyproject.toml
+plugins: anyio-4.13.0, asyncio-0.24.0
+asyncio: mode=Mode.STRICT, default_loop_scope=None
+collecting ... collected 106 items
+
+tests/e2e/test_demo_scenario.py::test_demo_scenario_flow PASSED          [  0%]
+tests/integration/test_agent_conversation.py::TestAgentConversation::test_agent_responds_to_message PASSED [  1%]
+tests/integration/test_agent_conversation.py::TestAgentConversation::test_agent_injects_memories_in_context PASSED [  2%]
+tests/integration/test_agent_conversation.py::TestAgentConversation::test_agent_publishes_conversation_turn_event PASSED [  3%]
+tests/integration/test_agent_conversation.py::TestAgentConversation::test_negative_feedback_triggers_failure_log PASSED [  4%]
+tests/integration/test_agent_conversation.py::TestAgentConversation::test_session_manager_tracks_turns PASSED [  5%]
+tests/integration/test_court_to_vault.py::test_approved_memory_reaches_vault PASSED [  6%]
+tests/integration/test_court_to_vault.py::test_quarantined_memory_in_pending_queue PASSED [  7%]
+tests/integration/test_court_to_vault.py::test_accept_resolution_writes_to_vault PASSED [  8%]
+tests/integration/test_court_to_vault.py::test_reject_resolution_discards_memory PASSED [  9%]
+tests/integration/test_court_to_vault.py::test_merge_resolution_writes_merged_content PASSED [ 10%]
+tests/integration/test_court_to_vault.py::test_double_resolve_raises PASSED [ 11%]
+tests/integration/test_court_to_vault.py::test_graph_updated_for_kg_node_memories PASSED [ 12%]
+tests/integration/test_ingestion_pipeline.py::test_single_turn_no_episode PASSED [ 13%]
+tests/integration/test_ingestion_pipeline.py::test_boundary_triggers_write PASSED [ 14%]
+tests/integration/test_ingestion_pipeline.py::test_buffer_overflow_triggers_write PASSED [ 15%]
+tests/integration/test_ingestion_pipeline.py::test_predict_calibrate_deduplication PASSED [ 16%]
+tests/integration/test_ingestion_pipeline.py::test_classifier_fallback_on_llm_error PASSED [ 16%]
+tests/test_core_basic.py::TestCoreTypes::test_memory_type_enum PASSED    [ 17%]
+tests/test_core_basic.py::TestCoreTypes::test_memory_tier_enum PASSED    [ 18%]
+tests/test_core_basic.py::TestCoreTypes::test_provenance_creation PASSED [ 19%]
+tests/test_core_basic.py::TestCoreTypes::test_mem_cube_creation PASSED   [ 20%]
+tests/test_core_basic.py::TestCoreTypes::test_mem_cube_bump_access PASSED [ 21%]
+tests/test_core_basic.py::TestCoreTypes::test_mem_cube_with_embedding PASSED [ 22%]
+tests/test_core_basic.py::TestCoreTypes::test_mem_cube_to_dict PASSED    [ 23%]
+tests/test_core_basic.py::TestCoreTypes::test_mem_cube_from_dict PASSED  [ 24%]
+tests/test_core_basic.py::TestCoreErrors::test_memora_error PASSED       [ 25%]
+tests/test_core_basic.py::TestCoreErrors::test_memory_not_found_error PASSED [ 26%]
+tests/test_core_basic.py::TestCoreErrors::test_embedding_dimension_error PASSED [ 27%]
+tests/test_core_basic.py::TestCoreEvents::test_event_bus_creation PASSED [ 28%]
+tests/test_core_basic.py::TestCoreEvents::test_conversation_turn_event PASSED [ 29%]
+tests/test_core_basic.py::TestCoreEvents::test_memory_write_requested_event PASSED [ 30%]
+tests/test_core_basic.py::TestCoreEvents::test_event_bus_publish_subscribe PASSED [ 31%]
+tests/test_core_basic.py::TestCoreConfig::test_get_settings PASSED       [ 32%]
+tests/test_core_basic.py::TestCoreConfig::test_settings_validation PASSED [ 33%]
+tests/unit/test_contradiction_detector.py::test_score_extraction_valid PASSED [ 33%]
+tests/unit/test_contradiction_detector.py::test_score_out_of_range_raises PASSED [ 34%]
+tests/unit/test_contradiction_detector.py::test_empty_reasoning_raises PASSED [ 35%]
+tests/unit/test_contradiction_detector.py::test_verdict_quarantined_above_threshold PASSED [ 36%]
+tests/unit/test_contradiction_detector.py::test_verdict_cleared_below_threshold PASSED [ 37%]
+tests/unit/test_contradiction_detector.py::test_verdict_exactly_at_threshold PASSED [ 38%]
+tests/unit/test_contradiction_detector.py::test_judge_agent_approves_when_no_candidates PASSED [ 39%]
+tests/unit/test_contradiction_detector.py::test_judge_agent_quarantines_high_score PASSED [ 40%]
+tests/unit/test_contradiction_detector.py::test_judge_agent_approves_low_score PASSED [ 41%]
+tests/unit/test_contradiction_detector.py::test_judge_agent_uses_max_score_across_candidates PASSED [ 42%]
+tests/unit/test_contradiction_detector.py::test_judge_agent_fail_open_on_llm_error PASSED [ 43%]
+tests/unit/test_episode_segmenter.py::test_single_turn_no_episode PASSED [ 44%]
+tests/unit/test_episode_segmenter.py::test_boundary_triggers_write PASSED [ 45%]
+tests/unit/test_episode_segmenter.py::test_buffer_overflow_triggers_write PASSED [ 46%]
+tests/unit/test_experience_learner.py::test_failure_log_write PASSED     [ 47%]
+tests/unit/test_experience_learner.py::test_get_patterns_aggregates_correctly PASSED [ 48%]
+tests/unit/test_experience_learner.py::test_pattern_matcher_overlap PASSED [ 49%]
+tests/unit/test_experience_learner.py::test_outcome_tracker_records_and_retrieves PASSED [ 50%]
+tests/unit/test_experience_learner.py::test_experience_learner_threshold_penalizes_at_two PASSED [ 50%]
+tests/unit/test_hybrid_retriever.py::test_dense_search_returns_sorted_by_score FAILED [ 51%]
+tests/unit/test_hybrid_retriever.py::test_symbolic_search_by_tags FAILED [ 52%]
+tests/unit/test_hybrid_retriever.py::test_hybrid_merges_both_sources FAILED [ 53%]
+tests/unit/test_hybrid_retriever.py::test_reranker_penalizes_failure_clusters PASSED [ 54%]
+tests/unit/test_hybrid_retriever.py::test_reranker_recency_boost PASSED  [ 55%]
+tests/unit/test_hybrid_retriever.py::test_context_pager_evicts_on_overflow PASSED [ 56%]
+tests/unit/test_hybrid_retriever.py::test_context_pager_respects_priority_order PASSED [ 57%]
+tests/unit/test_hybrid_retriever.py::test_experience_learner_cache_freshness PASSED [ 58%]
+tests/unit/test_hybrid_retriever.py::test_query_expander_collects_tags PASSED [ 59%]
+tests/unit/test_mem_cube.py::TestMemCubeValidation::test_mem_cube_creation_with_valid_data PASSED [ 60%]
+tests/unit/test_mem_cube.py::TestMemCubeValidation::test_mem_cube_empty_content_raises_error PASSED [ 61%]
+tests/unit/test_mem_cube.py::TestMemCubeValidation::test_mem_cube_wrong_embedding_dimension_raises_error PASSED [ 62%]
+tests/unit/test_mem_cube.py::TestMemCubeValidation::test_mem_cube_negative_access_count_raises_error PASSED [ 63%]
+tests/unit/test_mem_cube.py::TestMemCubeValidation::test_mem_cube_no_embedding_is_valid PASSED [ 64%]
+tests/unit/test_mem_cube.py::TestProvenance::test_provenance_new_creates_valid_provenance PASSED [ 65%]
+tests/unit/test_mem_cube.py::TestProvenance::test_provenance_with_parent_id PASSED [ 66%]
+tests/unit/test_mem_cube.py::TestProvenance::test_provenance_version_increment PASSED [ 66%]
+tests/unit/test_mem_cube.py::TestMemCubeFactory::test_mem_cube_bump_access_returns_new_cube PASSED [ 67%]
+tests/unit/test_mem_cube.py::TestMemCubeFactory::test_mem_cube_with_embedding_creates_new_cube PASSED [ 68%]
+tests/unit/test_mem_cube.py::TestMemCubeFactory::test_mem_cube_with_embedding_wrong_dimension_raises_error PASSED [ 69%]
+tests/unit/test_mem_cube.py::TestMemCubeFactory::test_mem_cube_to_dict_serialization PASSED [ 70%]
+tests/unit/test_mem_cube.py::TestMemCubeFactory::test_mem_cube_from_dict_deserialization PASSED [ 71%]
+tests/unit/test_mem_cube.py::TestMemCubeFactory::test_mem_cube_from_dict_without_provenance PASSED [ 72%]
+tests/unit/test_mem_cube.py::TestContradictionVerdict::test_contradiction_verdict_creation PASSED [ 73%]
+tests/unit/test_mem_cube.py::TestContradictionVerdict::test_contradiction_verdict_invalid_score_raises_error PASSED [ 74%]
+tests/unit/test_mem_cube.py::TestContradictionVerdict::test_contradiction_verdict_empty_reasoning_raises_error PASSED [ 75%]
+tests/unit/test_mem_cube.py::TestContradictionVerdict::test_contradiction_verdict_invalid_resolution_raises_error PASSED [ 76%]
+tests/unit/test_mem_cube.py::TestContradictionVerdict::test_contradiction_verdict_merge_resolution PASSED [ 77%]
+tests/unit/test_mem_cube.py::TestEpisode::test_episode_creation PASSED   [ 78%]
+tests/unit/test_mem_cube.py::TestEpisode::test_episode_empty_content_raises_error PASSED [ 79%]
+tests/unit/test_mem_cube.py::TestEpisode::test_episode_invalid_turn_range_raises_error PASSED [ 80%]
+tests/unit/test_mem_cube.py::TestEpisode::test_episode_invalid_boundary_score_raises_error PASSED [ 81%]
+tests/unit/test_mem_cube.py::TestEpisode::test_episode_default_values PASSED [ 82%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_to_hot_tier_recent_access PASSED [ 83%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_to_cold_tier_old_memory PASSED [ 83%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_to_warm_tier_default PASSED [ 84%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_access_count[0-warm] PASSED [ 85%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_access_count[5-warm] PASSED [ 86%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_access_count[10-hot] PASSED [ 87%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_access_count[20-hot] PASSED [ 88%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_age_and_access[0.5-15-hot] PASSED [ 89%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_age_and_access[1-5-warm] PASSED [ 90%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_age_and_access[5-3-warm] PASSED [ 91%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_age_and_access[10-1-warm] PASSED [ 92%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_age_and_access[30-0-cold] PASSED [ 93%]
+tests/unit/test_tier_router.py::TestTierRouter::test_route_by_age_and_access[10-0-cold] PASSED [ 94%]
+tests/unit/test_tier_router.py::TestTierRouter::test_promote_from_cold_to_warm PASSED [ 95%]
+tests/unit/test_tier_router.py::TestTierRouter::test_promote_from_warm_to_hot PASSED [ 96%]
+tests/unit/test_tier_router.py::TestTierRouter::test_promote_hot_stays_hot PASSED [ 97%]
+tests/unit/test_tier_router.py::TestTierRouter::test_demote_from_hot_to_warm PASSED [ 98%]
+tests/unit/test_tier_router.py::TestTierRouter::test_demote_from_warm_to_cold PASSED [ 99%]
+tests/unit/test_tier_router.py::TestTierRouter::test_demote_cold_stays_cold PASSED [100%]
+
+================================== FAILURES ===================================
+__________________ test_dense_search_returns_sorted_by_score __________________
+
+mock_vector_store = <conftest.mock_vector_store.<locals>.InMemoryVectorStore object at 0x000001B604840650>
+mock_embedder = <AsyncMock spec='IEmbeddingModel' id='1881271450064'>
+
+    @pytest.mark.asyncio
+    async def test_dense_search_returns_sorted_by_score(mock_vector_store, mock_embedder):
+        retriever = DenseRetriever(mock_vector_store, mock_embedder)
+        results = await retriever.search("test query")
+>       assert len(results) == 3
+E       assert 0 == 3
+E        +  where 0 = len([])
+
+tests\unit\test_hybrid_retriever.py:19: AssertionError
+________________________ test_symbolic_search_by_tags _________________________
+
+cube_factory = <function cube_factory.<locals>.create_cube at 0x000001B6047A1800>
+
+    @pytest.mark.asyncio
+    async def test_symbolic_search_by_tags(cube_factory):
+        cube1 = await cube_factory("cube 1")
+        cube1.tags = ["pricing", "strategy"]
+    
+        from unittest.mock import MagicMock
+        mock_session_factory = MagicMock()
+        mock_session = AsyncMock()
+        mock_result = MagicMock()
+    
+        class MockRow:
+            def __init__(self, mapping):
+                self._mapping = mapping
+    
+        d = cube1.to_dict()
+        if "provenance" in d and d["provenance"]:
+            if not isinstance(d["provenance"]["created_at"], str):
+                d["provenance"]["created_at"] = d["provenance"]["created_at"].isoformat()
+            if not isinstance(d["provenance"]["updated_at"], str):
+                d["provenance"]["updated_at"] = d["provenance"]["updated_at"].isoformat()
+    
+        mock_result.fetchall.return_value = [MockRow(d)]
+        mock_session.execute.return_value = mock_result
+    
+        mock_session_factory.return_value.__aenter__.return_value = mock_session
+    
+        retriever = SymbolicRetriever(mock_session_factory)
+        results = await retriever.search_by_tags(["pricing"])
+>       assert len(results) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\unit\test_hybrid_retriever.py:51: AssertionError
+_______________________ test_hybrid_merges_both_sources _______________________
+
+mock_vector_store = <conftest.mock_vector_store.<locals>.InMemoryVectorStore object at 0x000001B604848310>
+mock_embedder = <AsyncMock spec='IEmbeddingModel' id='1881271470416'>
+cube_factory = <function cube_factory.<locals>.create_cube at 0x000001B6047A3EC0>
+mock_failure_log = <AsyncMock spec='IFailureLog' id='1881271605264'>
+
+    @pytest.mark.asyncio
+    async def test_hybrid_merges_both_sources(mock_vector_store, mock_embedder, cube_factory, mock_failure_log):
+        cube_A = await cube_factory("a")
+        cube_A.id = "mock-cube-0"
+        cube_B = await cube_factory("b")
+        cube_B.id = "mock-cube-symbolic"
+    
+        dense = DenseRetriever(mock_vector_store, mock_embedder)
+    
+        symbolic = AsyncMock()
+        symbolic.search_by_tags.return_value = [cube_B]
+    
+        kg_repo = AsyncMock()
+        expander = QueryExpander(kg_repo, symbolic)
+    
+        settings = Settings(dense_weight=0.5, symbolic_weight=0.5, failure_penalty=0.5)
+        learner = ExperienceLearner(mock_failure_log)
+        reranker = Reranker(learner, settings)
+    
+        hybrid = HybridRetriever(dense, symbolic, expander, reranker, settings)
+        results = await hybrid.search("query")
+    
+        ids = [c.id for c in results]
+>       assert "mock-cube-0" in ids
+E       AssertionError: assert 'mock-cube-0' in ['mock-cube-symbolic']
+
+tests\unit\test_hybrid_retriever.py:77: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/unit/test_hybrid_retriever.py::test_dense_search_returns_sorted_by_score
+FAILED tests/unit/test_hybrid_retriever.py::test_symbolic_search_by_tags - as...
+FAILED tests/unit/test_hybrid_retriever.py::test_hybrid_merges_both_sources
+======================= 3 failed, 103 passed in 10.23s ========================

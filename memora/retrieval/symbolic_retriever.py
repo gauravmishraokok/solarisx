@@ -1,58 +1,59 @@
-from typing import Callable, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
-import json
+"""SymbolicRetriever module.
+
+Performs exact keyword or tag-based matching using document database.
+"""
+
+from typing import List, Optional
+from motor.motor_asyncio import AsyncIOMotorDatabase
 from memora.core.types import MemCube, MemoryType
 
+
 class SymbolicRetriever:
-    def __init__(self, session_factory: Callable[[], AsyncSession]):
-        self.session_factory = session_factory
-
-    async def search_by_tags(self, tags: list[str], top_k: int = 10) -> list[MemCube]:
-        sql = text("""
-            SELECT id, content, memory_type, tier, tags, embedding, provenance, access_count, ttl_seconds, extra
-            FROM mem_cubes
-            WHERE tags @> :tags::jsonb
-            ORDER BY access_count DESC, provenance->>'updated_at' DESC
-            LIMIT :limit
-        """)
-        async with self.session_factory() as session:
-            result = await session.execute(sql, {"tags": json.dumps(tags), "limit": top_k})
-            rows = result.fetchall()
-            cubes = []
-            for row in rows:
-                cubes.append(self._row_to_cube(row))
-            return cubes
-
-    async def search_by_type(self, memory_type: MemoryType, session_id: Optional[str] = None, limit: int = 20) -> list[MemCube]:
+    """Retrieves memories using exact attribute or tag matching."""
+    
+    def __init__(self, db: AsyncIOMotorDatabase):
+        from memora.storage.mongo.collections import MEM_CUBES
+        self.collection = db[MEM_CUBES]
+        
+    async def search_by_tags(
+        self,
+        tags: list[str],
+        top_k: int = 10,
+    ) -> list[MemCube]:
+        """
+        Return MemCubes that contain ALL specified tags.
+        MongoDB $all operator on the tags array.
+        """
+        from memora.storage.vector.mongo_vector_client import _doc_to_cube
+        if not tags:
+            return []
+        cursor = self.collection.find(
+            {"tags": {"$all": tags}},
+            sort=[("access_count", -1), ("provenance.updated_at", -1)],
+            limit=top_k,
+        )
+        results = []
+        async for doc in cursor:
+            results.append(_doc_to_cube(doc))
+        return results
+        
+    async def search_by_type(
+        self,
+        memory_type: MemoryType,
+        session_id: str | None = None,
+        limit: int = 20,
+    ) -> list[MemCube]:
+        """Filter by memory_type, optionally within a session."""
+        from memora.storage.vector.mongo_vector_client import _doc_to_cube
+        query: dict = {"memory_type": memory_type.value}
         if session_id:
-            sql = text("""
-                SELECT id, content, memory_type, tier, tags, embedding, provenance, access_count, ttl_seconds, extra
-                FROM mem_cubes
-                WHERE memory_type = :memory_type AND provenance->>'session_id' = :session_id
-                ORDER BY access_count DESC, provenance->>'updated_at' DESC
-                LIMIT :limit
-            """)
-            params = {"memory_type": memory_type.value, "session_id": session_id, "limit": limit}
-        else:
-            sql = text("""
-                SELECT id, content, memory_type, tier, tags, embedding, provenance, access_count, ttl_seconds, extra
-                FROM mem_cubes
-                WHERE memory_type = :memory_type
-                ORDER BY access_count DESC, provenance->>'updated_at' DESC
-                LIMIT :limit
-            """)
-            params = {"memory_type": memory_type.value, "limit": limit}
-            
-        async with self.session_factory() as session:
-            result = await session.execute(sql, params)
-            rows = result.fetchall()
-            cubes = []
-            for row in rows:
-                cubes.append(self._row_to_cube(row))
-            return cubes
-
-    def _row_to_cube(self, row) -> MemCube:
-        d = dict(row._mapping)
-        # SQLAlchemy returns dict or lists based on column type, for JSON types tags, provenance, extra
-        return MemCube.from_dict(d)
+            query["provenance.session_id"] = session_id
+        cursor = self.collection.find(
+            query,
+            sort=[("provenance.created_at", -1)],
+            limit=limit,
+        )
+        results = []
+        async for doc in cursor:
+            results.append(_doc_to_cube(doc))
+        return results

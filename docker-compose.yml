@@ -1,15 +1,5 @@
 version: "3.9"
 services:
-  postgres:
-    image: pgvector/pgvector:pg16
-    environment:
-      POSTGRES_USER: memora
-      POSTGRES_PASSWORD: memora
-      POSTGRES_DB: memora
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
 
   neo4j:
     image: neo4j:5.25
@@ -28,5 +18,4 @@ services:
       - "6379:6379"
 
 volumes:
-  pgdata:
   neo4jdata:

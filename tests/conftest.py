@@ -78,28 +78,131 @@ def mock_llm():
 
 @pytest.fixture
 def mock_vector_store():
-    """Mock IVectorSearch returning deterministic similarity results."""
-    vector_store = AsyncMock(spec=IVectorSearch)
-    
-    async def similarity_search(query_embedding: List[float], top_k: int = 5, memory_types: List[MemoryType] = None):
-        # Return deterministic mock results
-        cubes = []
-        for i in range(min(top_k, 3)):
-            cube = MemCube(
-                id=f"mock-cube-{i}",
-                content=f"Mock content {i}",
-                memory_type=MemoryType.EPISODIC,
-                tier=MemoryTier.WARM,
-                tags=[f"tag{i}"],
-                embedding=[0.1 * i] * 384,
-                provenance=Provenance.new("test", f"session-{i}")
-            )
-            similarity = 0.9 - (i * 0.1)
-            cubes.append((cube, similarity))
-        return cubes
-    
-    vector_store.similarity_search.side_effect = similarity_search
-    return vector_store
+    """
+    In-memory vector store mock.
+    Now backed by MongoVectorClient interface instead of PgVectorClient.
+    Interface is identical — IVectorSearch contract unchanged.
+    """
+    class InMemoryVectorStore(IVectorSearch):
+        def __init__(self):
+            self._docs: dict[str, tuple[MemCube, list[float]]] = {}
+
+        async def upsert(self, cube: MemCube) -> None:
+            self._docs[cube.id] = (cube, cube.embedding or [])
+
+        async def similarity_search(self, query_embedding, top_k=5, memory_types=None):
+            import numpy as np
+            results = []
+            q = np.array(query_embedding)
+            for cube, emb in self._docs.values():
+                if memory_types and cube.memory_type not in memory_types:
+                    continue
+                if not emb:
+                    continue
+                e = np.array(emb)
+                score = float(np.dot(q, e) / (np.linalg.norm(q) * np.linalg.norm(e) + 1e-9))
+                results.append((cube, score))
+            results.sort(key=lambda x: x[1], reverse=True)
+            return results[:top_k]
+
+        async def delete(self, cube_id: str) -> None:
+            if cube_id not in self._docs:
+                from memora.core.errors import MemoryNotFoundError
+                raise MemoryNotFoundError(cube_id)
+            del self._docs[cube_id]
+
+    return InMemoryVectorStore()
+
+
+@pytest.fixture
+def mock_db():
+    """
+    In-memory mock of AsyncIOMotorDatabase.
+    Returns a simple dict-backed mock for unit tests that need
+    quarantine_repo or failure_log without a real Atlas connection.
+    """
+    class MockCollection:
+        def __init__(self):
+            self._docs: dict = {}
+
+        async def insert_one(self, doc):
+            self._docs[doc["_id"]] = doc
+
+        async def find_one(self, query):
+            for doc in self._docs.values():
+                if self._matches(doc, query):
+                    return dict(doc)
+            return None
+
+        async def replace_one(self, query, replacement, upsert=False):
+            for key, doc in self._docs.items():
+                if self._matches(doc, query):
+                    self._docs[key] = replacement
+                    return
+            if upsert:
+                self._docs[replacement["_id"]] = replacement
+
+        async def update_one(self, query, update):
+            for doc in self._docs.values():
+                if self._matches(doc, query):
+                    if "$set" in update:
+                        doc.update(update["$set"])
+                    if "$inc" in update:
+                        for k, v in update["$inc"].items():
+                            doc[k] = doc.get(k, 0) + v
+                    break
+
+        async def delete_one(self, query):
+            class Result:
+                deleted_count = 0
+            r = Result()
+            for key, doc in list(self._docs.items()):
+                if self._matches(doc, query):
+                    del self._docs[key]
+                    r.deleted_count = 1
+                    break
+            return r
+
+        def find(self, query=None, sort=None, limit=0):
+            return MockCursor(list(self._docs.values()), query, sort, limit)
+
+        def aggregate(self, pipeline):
+            return MockCursor(list(self._docs.values()))
+
+        def _matches(self, doc, query):
+            if not query:
+                return True
+            for k, v in query.items():
+                if doc.get(k) != v:
+                    return False
+            return True
+
+    class MockCursor:
+        def __init__(self, docs, query=None, sort=None, limit=0):
+            self._docs = docs
+            self._limit = limit
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            if not self._docs:
+                raise StopAsyncIteration
+            return self._docs.pop(0)
+
+        async def to_list(self, n):
+            return list(self._docs)
+
+    class MockDB:
+        def __init__(self):
+            self._collections: dict[str, MockCollection] = {}
+
+        def __getitem__(self, name):
+            if name not in self._collections:
+                self._collections[name] = MockCollection()
+            return self._collections[name]
+
+    return MockDB()
 
 
 @pytest.fixture

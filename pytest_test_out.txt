@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\gaura\AppData\Local\pypoetry\Cache\virtualenvs\memora-uEl6nKVZ-py3.11\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\gaura\OneDrive\Desktop\hack-solarisx
+configfile: pyproject.toml
+plugins: anyio-4.13.0, asyncio-0.24.0
+asyncio: mode=Mode.STRICT, default_loop_scope=None
+collecting ... collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+______________ ERROR collecting tests/e2e/test_demo_scenario.py _______________
+ImportError while importing test module 'C:\Users\gaura\OneDrive\Desktop\hack-solarisx\tests\e2e\test_demo_scenario.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\test_demo_scenario.py:7: in <module>
+    from memora.api.app import create_app
+memora\api\app.py:59: in <module>
+    from memora.scheduler.pipeline import IngestionPipeline
+E   ModuleNotFoundError: No module named 'memora.scheduler.pipeline'
+=========================== short test summary info ===========================
+ERROR tests/e2e/test_demo_scenario.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 9.03s ===============================
