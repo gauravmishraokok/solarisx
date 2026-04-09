@@ -19,8 +19,6 @@ from memora.storage.vector.mongo_vector_client import MongoVectorClient
 
 # Embedding & Graph
 from memora.storage.vector.embedding import SentenceTransformerEmbedder
-from memora.storage.graph.neo4j_client import Neo4jClient
-from memora.storage.graph.networkx_client import NetworkXClient
 
 # Vault
 from memora.vault.timeline_writer import TimelineWriter
@@ -79,18 +77,13 @@ async def lifespan(app: FastAPI):
 
     # 3. Storage clients
     mongo_vector_client = MongoVectorClient(db, settings.embedding_dim)
-    graph_client = (
-        NetworkXClient()
-        if settings.use_networkx_fallback
-        else Neo4jClient(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
-    )
 
     # 4. Vault
     timeline_writer = TimelineWriter(db)                        # Motor-backed
     cube_factory = MemCubeFactory(embedder, settings)
     episodic_repo = EpisodicRepo(mongo_vector_client, timeline_writer)
     semantic_repo = SemanticRepo(mongo_vector_client, timeline_writer)
-    kg_repo = KGRepo(graph_client, timeline_writer)
+    kg_repo = KGRepo(timeline_writer)
     quarantine_repo = QuarantineRepo(db)                        # Motor-backed
 
     # 5. Retrieval
@@ -125,7 +118,7 @@ async def lifespan(app: FastAPI):
     session_mgr = SessionManager()
     context_builder = ContextBuilder(context_pager, settings)
     outcome_tracker = OutcomeTracker()
-    tool_executor = ToolExecutor(retriever, cube_factory, bus)
+    tool_executor = ToolExecutor(retriever, bus)
     agent = MemoraAgent(
         llm, retriever, context_builder, tool_executor,
         session_mgr, outcome_tracker, bus, settings
@@ -146,8 +139,11 @@ async def lifespan(app: FastAPI):
     app.state.quarantine_mgr = quarantine_mgr
     app.state.resolution_handler = resolution_handler
     app.state.episodic_repo = episodic_repo
+    app.state.semantic_repo = semantic_repo
     app.state.kg_repo = kg_repo
     app.state.settings = settings
+    app.state.db = db
+    app.state.cube_factory = cube_factory
 
     yield
 
