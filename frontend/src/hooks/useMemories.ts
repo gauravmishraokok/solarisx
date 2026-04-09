@@ -7,7 +7,7 @@ export function useMemories() {
   return useQuery({
     queryKey: ['memories', sessionId],
     queryFn: () => getMemories(sessionId),
-    refetchInterval: 2000,
+    refetchInterval: 5000,
     placeholderData: (prev) => prev,
   })
 }

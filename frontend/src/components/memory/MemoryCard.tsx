@@ -16,6 +16,7 @@ interface Memory {
   updated_at?: string
   session_id?: string
   provenance?: Record<string, unknown>
+  extra?: { label?: string; detail?: string; key?: string }
 }
 
 function typeColor(type: string) {
@@ -46,6 +47,11 @@ export function MemoryCard({ memory, isNew }: { memory: Memory; isNew?: boolean 
   const type = (memory.type ?? memory.memory_type ?? 'episodic').toLowerCase()
   const tier = (memory.tier ?? 'cold').toLowerCase()
   const content = memory.content ?? ''
+  const extra = memory.extra ?? {}
+  const headline =
+    typeof extra.label === 'string' && extra.label.trim() && extra.label.trim() !== content.trim().split('\n')[0]
+      ? extra.label.trim()
+      : null
   const tags: string[] = memory.tags ?? []
   const score = memory.relevance_score ?? 0
   const tc = typeColor(type)
@@ -118,6 +124,21 @@ export function MemoryCard({ memory, isNew }: { memory: Memory; isNew?: boolean 
         </div>
       </div>
 
+      {headline && (
+        <div
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 13,
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            marginBottom: 6,
+            letterSpacing: '0.02em',
+          }}
+        >
+          {headline}
+        </div>
+      )}
+
       {/* Content */}
       <div style={{
         fontFamily: 'var(--font-mono)',
@@ -130,7 +151,9 @@ export function MemoryCard({ memory, isNew }: { memory: Memory; isNew?: boolean 
         overflow: 'hidden',
         marginBottom: 8,
       }}>
-        {content}
+        {typeof extra.detail === 'string' && extra.detail && type === 'kg_node'
+          ? extra.detail
+          : content}
       </div>
 
       {/* Tags */}

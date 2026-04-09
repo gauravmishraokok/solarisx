@@ -8,9 +8,9 @@ export function useCourtQueue() {
   const prevCountRef = useRef(0)
 
   const query = useQuery({
-    queryKey: ['court/queue'],
+    queryKey: ['court-queue'],
     queryFn: getCourtQueue,
-    refetchInterval: 1500,
+    refetchInterval: 4000,
     placeholderData: (prev) => prev,
   })
 

@@ -4,7 +4,13 @@ import { getGraphNodes, getGraphEdges } from '../api/graph'
 export function useGraphData() {
   return useQuery({
     queryKey: ['graph'],
-    queryFn: () => Promise.all([getGraphNodes(), getGraphEdges()]).then(([nodes, edges]) => ({ nodes, edges })),
+    queryFn: async () => {
+      const [nodesRes, edgesRes] = await Promise.all([getGraphNodes(), getGraphEdges()])
+      return {
+        nodes: Array.isArray(nodesRes?.nodes) ? nodesRes.nodes : [],
+        edges: Array.isArray(edgesRes?.edges) ? edgesRes.edges : [],
+      }
+    },
     refetchInterval: 5000,
     refetchOnWindowFocus: true,
     placeholderData: (prev) => prev,

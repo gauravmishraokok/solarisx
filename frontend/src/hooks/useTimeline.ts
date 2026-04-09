@@ -7,7 +7,7 @@ export function useTimeline() {
   return useQuery({
     queryKey: ['timeline', sessionId],
     queryFn: () => getTimeline(sessionId),
-    refetchInterval: 2000,
+    refetchInterval: 5000,
     placeholderData: (prev) => prev,
   })
 }
