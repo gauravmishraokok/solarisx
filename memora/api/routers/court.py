@@ -11,19 +11,55 @@ from memora.core.errors import AlreadyResolvedError, QuarantineNotFoundError
 
 router = APIRouter(prefix="/court", tags=["court"])
 
+from memora.api.schemas.court_schemas import SupportingEvidence
+
+# ── Demo quarantine queue ────────────────────────────────────────────────────
+# Two hardcoded contradiction scenarios seeded for the demo:
+#   1. Name conflict  : "My name is Lavish" vs established identity Gaurav Mishra
+#   2. College conflict: "I am from RNSIT"  vs established college MSRIT
 _QUEUE: dict[str, dict] = {
-    "q-1": {
+    "q-demo-name": {
         "item": QuarantineItemResponse(
-            quarantine_id="q-1",
-            incoming_content="User now prefers premium pricing",
-            conflicting_cube_id="cube-1",
-            contradiction_score=0.85,
-            reasoning="Incoming content conflicts with existing pricing preference memory.",
+            quarantine_id="q-demo-name",
+            incoming_content='User claims their name is "Lavish"',
+            conflicting_cube_id="mem-gaurav-name",
+            conflicting_content='User\'s name is Gaurav Mishra',
+            contradiction_score=0.94,
+            reasoning=(
+                "The incoming claim directly contradicts the established identity. "
+                "The stored name 'Gaurav Mishra' is further corroborated by the "
+                "GitHub username 'gauravmishraokok', which encodes the same name. "
+                "The probability that this new claim is correct is very low."
+            ),
             suggested_resolution="reject",
+            supporting_evidence=[
+                SupportingEvidence(
+                    label="GitHub Username",
+                    content="gauravmishraokok — username encodes 'Gaurav Mishra', not 'Lavish'",
+                ),
+            ],
             created_at=datetime.utcnow().isoformat(),
         ),
         "resolved": False,
-    }
+    },
+    "q-demo-college": {
+        "item": QuarantineItemResponse(
+            quarantine_id="q-demo-college",
+            incoming_content='User claims they study at RNSIT (R.N.S. Institute of Technology)',
+            conflicting_cube_id="mem-msrit-college",
+            conflicting_content='User studies at M S Ramaiah Institute of Technology (MSRIT) and enjoys it there',
+            contradiction_score=0.88,
+            reasoning=(
+                "User explicitly stated they study at MSRIT and expressed satisfaction with the institution. "
+                "RNSIT is a distinct engineering college located in a different part of Bangalore. "
+                "A student cannot simultaneously be enrolled at both; the earlier, confirmed statement takes precedence."
+            ),
+            suggested_resolution="reject",
+            supporting_evidence=[],
+            created_at=datetime.utcnow().isoformat(),
+        ),
+        "resolved": False,
+    },
 }
 
 
