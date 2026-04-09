@@ -39,6 +39,7 @@ class MemoryWriteRequested(BaseEvent):
 class MemoryApproved(BaseEvent):
     """Court cleared the memory. Vault should persist it."""
     cube: MemCube = field(default_factory=MemCube)
+    related_cubes: list = field(default_factory=list)  # List[MemCube] — similar memories found during court eval
 
 
 @dataclass

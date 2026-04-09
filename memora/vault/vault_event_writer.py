@@ -35,6 +35,9 @@ class VaultEventWriter:
         EPISODIC  → episodic_repo.save()
         SEMANTIC  → semantic_repo.upsert_by_key()
         KG_NODE   → kg_repo.upsert_node()
+
+        All approved memories are ALSO added as KG nodes and linked to related
+        memories found during court evaluation (multi-link knowledge graph).
         """
         cube = event.cube
         try:
@@ -47,7 +50,42 @@ class VaultEventWriter:
                 await self.kg.upsert_node(cube)
         except Exception as e:
             # Log and continue — never crash the event loop
-            print(f"[VaultEventWriter] handle_approved failed: {e}")
+            print(f"[VaultEventWriter] handle_approved failed (primary store): {e}")
+            return
+
+        # ── Knowledge Graph: add every approved memory as a node ──────────────
+        # This makes the KG a full-fidelity graph of ALL memories, not just KG_NODE types.
+        try:
+            await self.kg.upsert_node(cube)
+        except Exception as e:
+            print(f"[VaultEventWriter] KG upsert_node failed for {cube.id}: {e}")
+            return
+
+        # ── Knowledge Graph: link new node to all related memories ────────────
+        # related_cubes are the similar memories retrieved during court evaluation.
+        # Each one gets a bidirectional "relates_to" edge so the graph is multi-linked.
+        for related in event.related_cubes:
+            if related.id == cube.id:
+                continue
+            try:
+                # Ensure the related node exists in the KG (upsert is idempotent)
+                await self.kg.upsert_node(related)
+                # Forward edge: new memory → related memory
+                await self.kg.add_edge(
+                    from_id=cube.id,
+                    to_id=related.id,
+                    label="relates_to",
+                    metadata={"origin": cube.memory_type.value}
+                )
+                # Back edge: related memory → new memory
+                await self.kg.add_edge(
+                    from_id=related.id,
+                    to_id=cube.id,
+                    label="relates_to",
+                    metadata={"origin": related.memory_type.value}
+                )
+            except Exception as e:
+                print(f"[VaultEventWriter] KG edge creation failed ({cube.id} ↔ {related.id}): {e}")
 
     async def handle_quarantined(self, event: MemoryQuarantined) -> None:
         """

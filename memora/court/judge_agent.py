@@ -54,7 +54,7 @@ class JudgeAgent:
             return
 
         if not candidates:
-            await bus.publish(MemoryApproved(cube=event.cube))
+            await bus.publish(MemoryApproved(cube=event.cube, related_cubes=[]))
             return
 
         verdicts = []
@@ -71,7 +71,7 @@ class JudgeAgent:
                     user=user_msg,
                     schema=schema
                 )
-                
+
                 score = self.detector.score_from_llm_response(resp_json)
                 verdict = self.detector.make_verdict(
                     incoming_id=event.cube.id,
@@ -84,14 +84,14 @@ class JudgeAgent:
             except Exception as e:
                 # Log error, continue testing other candidates
                 pass
-                
+
         if not verdicts:
-            await bus.publish(MemoryApproved(cube=event.cube))
+            await bus.publish(MemoryApproved(cube=event.cube, related_cubes=candidates))
             return
-            
+
         max_verdict = max(verdicts, key=lambda v: v.score)
-        
+
         if max_verdict.is_quarantined:
             await bus.publish(MemoryQuarantined(verdict=max_verdict, incoming_cube=event.cube))
         else:
-            await bus.publish(MemoryApproved(cube=event.cube))
+            await bus.publish(MemoryApproved(cube=event.cube, related_cubes=candidates))
