@@ -33,7 +33,7 @@ class Settings(BaseSettings):
 
     # Memory Court
     contradiction_threshold: float = Field(default=0.75, ge=0.0, le=1.0)
-    court_retrieval_top_k: int = 3
+    court_retrieval_top_k: int = 20  # Check broadly — with few memories, we want to catch all conflicts
 
     # Retrieval
     top_k_retrieval: int = 5
